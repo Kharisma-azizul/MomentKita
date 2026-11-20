@@ -26,10 +26,12 @@ input[type=text]{width:100%;padding:16px;border-radius:16px;border:1px solid #33
 .stats{display:flex;margin-bottom:26px}
 .stats div{flex:1;text-align:center;border-left:1px solid #2a2a2a}
 .stats div:first-child{border:0}
+.stats .n{font-family:inherit;font-size:inherit;color:inherit}
 .stats b{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-size:40px;display:block;line-height:1.1}
 .stats b i{font-family:system-ui;font-size:22px;color:var(--mu)}
 .stats span{color:var(--mu);font-size:18px}
-.acts{display:grid;grid-template-columns:2.6fr 1fr 1fr 1fr;gap:12px}
+.acts{display:flex;gap:12px}
+.acts button{flex:1}.acts button:first-child{flex:2.6}
 .acts button{height:76px;border-radius:26px;border:1px solid #333;background:transparent;color:var(--tx);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .acts button:first-child{background:#ebe6df;color:#111;border:0}
 .acts svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -38,6 +40,9 @@ input[type=text]{width:100%;padding:16px;border-radius:16px;border:1px solid #33
 .up b{display:block;font-size:26px;margin:4px 0}
 .up p{margin:0;color:var(--mu);font-size:18px}
 .up i{width:60px;height:60px;border-radius:50%;background:#3b82f6;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:28px;color:#fff}
+.note{margin-top:22px;padding:20px 22px;border:1px dashed #333;border-radius:24px;color:var(--mu);font-size:17px;line-height:1.5;text-align:center}
+.note:empty{display:none}
+.grid button{position:absolute;right:12px;top:12px;z-index:2;width:42px;height:42px;border-radius:50%;border:0;background:#000a;color:#fff;font-size:20px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
 .grid div{position:relative;border-radius:28px;overflow:hidden;aspect-ratio:1/1.0;background:var(--card)}
 .grid img{width:100%;height:100%;object-fit:cover}
@@ -62,6 +67,7 @@ canvas{width:100%;border-radius:16px;margin:16px 0}
   <h1 style="font-size:36px;margin:10px 0 28px" id="title">Hari Pernikahan Kita</h1>
   <input type="text" id="name" placeholder="Masukkan namamu" maxlength="30">
   <button class="btn" id="enter">Masuk ke album →</button>
+  <p class="hint" style="margin-top:28px"><a href="#" id="ownerLink" style="color:inherit">Masuk sebagai pemilik</a></p>
 </section>
 
 <!-- 2. DASHBOARD ALBUM -->
@@ -70,19 +76,19 @@ canvas{width:100%;border-radius:16px;margin:16px 0}
   <div class="in">
   <h1 class="ttl" id="title2"></h1>
   <div class="stats">
-    <div><b id="sMoment">0</b><span>Momen</span></div>
+    <div><b><span id="sMoment" class="n">0</span><i>/<span id="mx">10</span></i></b><span id="lMoment">Fotomu</span></div>
     <div><b id="sLeft">-</b><span>Tersisa</span></div>
-    <div><b><span id="sPeople" style="color:inherit;font-size:inherit">0</span><i>/<span id="mx">5</span></i></b><span>Orang ›</span></div>
+    <div id="boxPpl" style="display:none"><b><span id="sPeople" class="n">0</span></b><span>Perangkat</span></div>
   </div>
   <div class="acts">
     <button id="cam"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
-    <button id="qrBtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v3M14 21h3M21 21h0"/></svg></button>
+    <button id="qrBtn" style="display:none"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v3M14 21h3M21 21h0"/></svg></button>
     <button id="gal"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="16" height="16" rx="2"/><path d="M3 17l5-5 4 4 3-3 4 4M19 2v6M16 5h6"/></svg></button>
     <button id="dl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 16l5-5 5 5M12 9v7M9 14l3 3 3-3"/></svg></button>
   </div>
   <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
   <input type="file" id="fGal" accept="image/*" hidden>
-  <div class="up" id="up"><div><small>UPGRADE ACARA INI?</small><b>Tambah pax</b><p>Paket gratis dibatasi 5 tamu</p></div><i>→</i></div>
+  <div class="note" id="note"></div>
   <div class="grid" id="grid"></div>
   </div>
 </section>
@@ -96,6 +102,7 @@ canvas{width:100%;border-radius:16px;margin:16px 0}
   <button class="btn" id="saveQr">⬇ Simpan QR</button>
 </section>
 
+<div id="toast" style="position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#ebe6df;color:#111;padding:12px 22px;border-radius:99px;display:none;z-index:20"></div>
 <!-- Modal unggah + filter -->
 <div class="modal" id="modal">
   <img id="prev">
@@ -108,19 +115,14 @@ canvas{width:100%;border-radius:16px;margin:16px 0}
 
 <script>
 // ====== PENGATURAN: isi dari Supabase (Project Settings > API) ======
-const SUPA_URL = "https://ofwoephdirefoclwmnjg.supabase.co/rest/v1/";
+const SUPA_URL = "https://ofwoephdirefoclwmnjg.supabase.co";
 const SUPA_KEY = "sb_publishable_nSbubnH5fWmPBUhsGnEvzw__LncTnXl";
-const EVENT_TITLE = "The Wedding Of Kharisma & Azizul";
-const EVENT_END = "2027-01-02T23:59:00"; // batas waktu acara
-const MAX_GUESTS = 5;                    // batas tamu paket gratis
+const EVENT_TITLE = "Hari Pernikahan Kita";
+const MAX_PHOTOS = 10; // batas foto per perangkat (diperiksa juga di server)
 // ====================================================================
 
-const DEMO = SUPA_URL.startsWith("ISI");
-const BASE = DEMO ? "" : new URL(SUPA_URL).origin; // buang path tambahan seperti /rest/v1
-const db = DEMO ? null : supabase.createClient(BASE, SUPA_KEY);
-const local = [];
+const db = supabase.createClient(new URL(SUPA_URL).origin, SUPA_KEY);
 const ALBUM = (new URLSearchParams(location.search).get("a") || "acara").replace(/[^a-zA-Z0-9_-]/g, "").slice(0,40) || "acara";
-let rows = [];
 const $ = id => document.getElementById(id);
 const FILTERS = {
   Asli: "none",
@@ -130,48 +132,101 @@ const FILTERS = {
   Mono: "grayscale(1) contrast(1.15)"
 };
 let me = localStorage.getItem("nama") || "", file = null, filt = "Asli";
+let rows = [], endAt = null, owner = sessionStorage.getItem("owner") || "";
+
+// ID perangkat: disimpan di localStorage + cookie (browser tidak bisa membaca IMEI)
+function deviceId(){
+  let d = localStorage.getItem("did") || (document.cookie.match(/(?:^|; )did=([^;]+)/) || [])[1];
+  if(!d || d.length < 16) d = crypto.randomUUID();
+  localStorage.setItem("did", d);
+  document.cookie = "did=" + d + ";max-age=63072000;path=/;SameSite=Lax";
+  return d;
+}
+const DID = deviceId();
+const photoUrl = p => db.storage.from("photos").getPublicUrl(p.path).data.publicUrl;
+const toast = t => { $("toast").textContent = t; $("toast").style.display = "block"; setTimeout(() => $("toast").style.display = "none", 2600); };
+const ended = () => endAt && Date.now() >= endAt;
 
 function show(id){ document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === id)); }
 $("title").textContent = $("title2").textContent = EVENT_TITLE;
-$("name").value = me; $("mx").textContent = MAX_GUESTS;
+$("name").value = me; $("mx").textContent = MAX_PHOTOS;
 
 // 1. Masuk
 $("enter").onclick = () => {
   const n = $("name").value.trim();
   if(!n) return alert("Masukkan namamu dulu");
-  me = n; localStorage.setItem("nama", n);
+  me = n; localStorage.setItem("nama", n); owner = ""; sessionStorage.removeItem("owner");
   show("album"); load();
+};
+$("ownerLink").onclick = async e => {
+  e.preventDefault();
+  const p = prompt("Masukkan kode pemilik");
+  if(!p) return;
+  const r = await db.rpc("owner_photos", {p_pass: p});
+  if(r.error) return alert("Kode pemilik salah");
+  owner = p; sessionStorage.setItem("owner", p); show("album"); load();
 };
 
 // 2. Dashboard
-const photoUrl = p => DEMO ? p.url : db.storage.from("photos").getPublicUrl(p.path).data.publicUrl;
 async function load(){
-  let data;
-  if(DEMO){ data = local; }
-  else {
-    const r = await db.from("photos").select("*").eq("album", ALBUM).order("created_at", {ascending:false});
-    if(r.error) return alert("Gagal memuat: " + r.error.message);
-    data = r.data;
+  if(!endAt){
+    const e = await db.rpc("event_end");
+    if(e.error) return alert("Gagal memuat: " + e.error.message);
+    endAt = new Date(e.data).getTime();
   }
-  rows = data;
-  $("sMoment").textContent = data.length;
-  $("sPeople").textContent = new Set(data.map(p => p.name)).size;
-  const ms = new Date(EVENT_END) - Date.now();
+  let mine = 0;
+  if(owner){
+    const r = await db.rpc("owner_photos", {p_pass: owner});
+    if(r.error) return alert("Gagal memuat: " + r.error.message);
+    rows = r.data; mine = rows.length;
+  } else {
+    const c = await db.rpc("my_count", {p_device: DID});
+    if(c.error) return alert("Gagal memuat: " + c.error.message);
+    mine = c.data; rows = [];
+    if(ended()){
+      const r = await db.rpc("my_photos", {p_device: DID});
+      if(r.error) return alert("Gagal memuat: " + r.error.message);
+      rows = r.data;
+    }
+  }
+  $("sMoment").textContent = mine;
+  $("mx").parentElement.style.display = owner ? "none" : "";
+  $("lMoment").textContent = owner ? "Semua foto" : "Fotomu";
+  $("boxPpl").style.display = owner ? "" : "none";
+  $("qrBtn").style.display = owner ? "" : "none";
+  $("sPeople").textContent = new Set(rows.map(p => p.device_id)).size;
+  const ms = endAt - Date.now();
   $("sLeft").textContent = ms <= 0 ? "Selesai" : Math.floor(ms/864e5) + "d " + Math.floor(ms%864e5/36e5) + "h";
-  if(data[0]) $("cover").style.backgroundImage = `url(${photoUrl(data[data.length-1])})`;
+  $("cover").style.backgroundImage = rows.length ? `url(${photoUrl(rows[rows.length-1])})` : "";
+  const tgl = new Date(endAt).toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"});
+  $("note").textContent = owner ? "Mode pemilik: kamu melihat foto semua tamu."
+    : ended() ? (rows.length ? "" : "Kamu belum mengunggah foto.")
+    : "🔒 Foto bersifat privat. Hasil fotomu akan muncul di sini setelah acara selesai (" + tgl + ").";
   $("grid").innerHTML = "";
-  data.forEach(p => {
-    const url = photoUrl(p);
+  rows.forEach(p => {
     const d = document.createElement("div");
-    d.innerHTML = `<img loading="lazy" src="${url}" style="filter:${FILTERS[p.filter]||"none"}"><small></small>`;
+    d.innerHTML = `<img loading="lazy" src="${photoUrl(p)}" style="filter:${FILTERS[p.filter]||"none"}"><button>⬇</button><small></small>`;
     d.querySelector("small").textContent = p.name;
+    d.querySelector("button").onclick = () => save(p);
     $("grid").appendChild(d);
   });
 }
-$("cam").onclick = () => $("fCam").click();
-$("gal").onclick = () => $("fGal").click();
-[$("fCam"), $("fGal")].forEach(i => i.onchange = () => {
+async function save(p){
+  const b = await (await fetch(photoUrl(p))).blob();
+  const a = document.createElement("a"); a.href = URL.createObjectURL(b);
+  a.download = "momen-" + p.path.split("/").pop(); a.click();
+}
+$("dl").onclick = async () => {
+  if(!owner && !ended()) return alert("Foto bisa diunduh setelah acara selesai.");
+  if(!rows.length) return alert("Belum ada foto.");
+  for(const p of rows){ await save(p); await new Promise(r => setTimeout(r, 400)); }
+};
+
+async function pick(i){
   if(!i.files[0]) return;
+  if(ended()) { i.value = ""; return alert("Acara sudah selesai."); }
+  const c = await db.rpc("my_count", {p_device: DID});
+  if(!c.error && c.data >= MAX_PHOTOS){ i.value = ""; return alert("Batas " + MAX_PHOTOS + " foto per perangkat sudah tercapai."); }
   file = i.files[0]; filt = "Asli";
   $("prev").src = URL.createObjectURL(file); $("prev").style.filter = "none";
   $("chips").innerHTML = "";
@@ -179,19 +234,15 @@ $("gal").onclick = () => $("fGal").click();
     const b = document.createElement("button");
     b.className = "chip" + (k === filt ? " on" : ""); b.textContent = k;
     b.onclick = () => { filt = k; $("prev").style.filter = FILTERS[k];
-      document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c === b)); };
+      document.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x === b)); };
     $("chips").appendChild(b);
   });
   $("modal").classList.add("on"); i.value = "";
-});
-$("up").onclick = () => alert("Upgrade belum tersedia.");
-$("dl").onclick = async () => {
-  for(const p of rows){
-    const b = await (await fetch(photoUrl(p))).blob();
-    const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "momen-" + (p.id||Date.now()) + ".jpg"; a.click();
-    await new Promise(r => setTimeout(r, 400));
-  }
-};
+}
+$("cam").onclick = () => $("fCam").click();
+$("gal").onclick = () => $("fGal").click();
+$("fCam").onchange = e => pick(e.target);
+$("fGal").onchange = e => pick(e.target);
 $("cancel").onclick = () => $("modal").classList.remove("on");
 
 // Kecilkan foto sebelum unggah (hemat storage gratis)
@@ -209,19 +260,20 @@ function shrink(f, max = 1600){
   });
 }
 $("send").onclick = async () => {
-  const names = new Set(rows.map(p => p.name));
-  if(!names.has(me) && names.size >= MAX_GUESTS) return alert("Paket gratis dibatasi " + MAX_GUESTS + " tamu.");
   $("send").disabled = true; $("send").textContent = "Mengunggah...";
   try {
     const blob = await shrink(file);
-    if(DEMO){ local.unshift({name:me, filter:filt, url:URL.createObjectURL(blob)}); $("modal").classList.remove("on"); load(); throw {message:""}; }
-    const path = `${ALBUM}/${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`;
+    const path = `${ALBUM}/${crypto.randomUUID()}.jpg`;
     let r = await db.storage.from("photos").upload(path, blob, {contentType:"image/jpeg"});
     if(r.error) throw r.error;
-    r = await db.from("photos").insert({album:ALBUM, name:me, path, filter:filt});
-    if(r.error) throw r.error;
-    $("modal").classList.remove("on"); load();
-  } catch(e){ if(e.message) alert("Gagal: " + e.message); }
+    r = await db.rpc("add_photo", {p_album:ALBUM, p_name:me, p_path:path, p_filter:filt, p_device:DID});
+    if(r.error){
+      await db.storage.from("photos").remove([path]).catch(() => {});
+      throw new Error(r.error.message.includes("LIMIT_REACHED") ? "Batas " + MAX_PHOTOS + " foto per perangkat sudah tercapai."
+        : r.error.message.includes("EVENT_ENDED") ? "Acara sudah selesai." : r.error.message);
+    }
+    $("modal").classList.remove("on"); toast("Foto terkirim ✓"); load();
+  } catch(e){ alert("Gagal: " + e.message); }
   $("send").disabled = false; $("send").textContent = "Unggah";
 };
 
