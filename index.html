@@ -6,6 +6,7 @@
 <title>Album Bersama</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#111;--card:#1b1b1b;--tx:#f1ece4;--mu:#9a958d;--ac:#3b82f6}
 *{box-sizing:border-box}
@@ -17,15 +18,31 @@ section.on{display:block}
 input[type=text]{width:100%;padding:16px;border-radius:16px;border:1px solid #333;background:var(--card);color:var(--tx);font-size:16px}
 .btn{display:block;width:100%;padding:16px;border:0;border-radius:16px;background:var(--tx);color:#111;font-size:16px;font-weight:600;cursor:pointer;margin-top:12px}
 .btn.alt{background:var(--card);color:var(--tx);border:1px solid #333}
-.stats{display:flex;justify-content:space-around;margin:24px 0}
-.stats b{font-family:Georgia,serif;font-size:32px;display:block}
-.stats span{color:var(--mu);font-size:14px}
-.row{display:flex;gap:10px}.row .btn{margin-top:0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
-.grid div{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:3/4;background:var(--card)}
+.dash{padding:0!important}
+.dash .in{padding:0 20px 60px}
+.cover{height:300px;background:linear-gradient(135deg,#5a4a3f,#2a2a2a) center/cover;position:relative}
+.cover:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,#111)}
+.ttl{font-family:"Playfair Display",Georgia,serif;font-size:36px;text-align:center;margin:-30px 0 26px;position:relative;z-index:1;line-height:1.15}
+.stats{display:flex;margin-bottom:26px}
+.stats div{flex:1;text-align:center;border-left:1px solid #2a2a2a}
+.stats div:first-child{border:0}
+.stats b{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-size:40px;display:block;line-height:1.1}
+.stats b i{font-family:system-ui;font-size:22px;color:var(--mu)}
+.stats span{color:var(--mu);font-size:18px}
+.acts{display:grid;grid-template-columns:2.6fr 1fr 1fr 1fr;gap:12px}
+.acts button{height:76px;border-radius:26px;border:1px solid #333;background:transparent;color:var(--tx);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.acts button:first-child{background:#ebe6df;color:#111;border:0}
+.acts svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.up{display:flex;align-items:center;justify-content:space-between;margin-top:22px;padding:20px 22px;border:1px solid #1f4a8a;border-radius:24px;background:#121a27;cursor:pointer}
+.up small{color:#4a90e2;letter-spacing:.18em;font-weight:700;font-size:15px}
+.up b{display:block;font-size:26px;margin:4px 0}
+.up p{margin:0;color:var(--mu);font-size:18px}
+.up i{width:60px;height:60px;border-radius:50%;background:#3b82f6;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:28px;color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
+.grid div{position:relative;border-radius:28px;overflow:hidden;aspect-ratio:1/1.0;background:var(--card)}
 .grid img{width:100%;height:100%;object-fit:cover}
-.grid small{position:absolute;left:10px;bottom:8px;font-style:italic;text-shadow:0 1px 4px #000}
-.hero{height:220px;margin:-24px -20px 0;background:linear-gradient(#444,#111);display:flex;align-items:flex-end;justify-content:center;padding:20px}
+.grid div:after{content:"";position:absolute;inset:55% 0 0;background:linear-gradient(transparent,#000a)}
+.grid small{position:absolute;left:18px;bottom:14px;font-style:italic;font-size:20px;z-index:1}
 .modal{position:fixed;inset:0;background:#000e;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:9}
 .modal.on{display:flex}
 .modal img{max-width:100%;max-height:55vh;border-radius:16px}
@@ -48,20 +65,26 @@ canvas{width:100%;border-radius:16px;margin:16px 0}
 </section>
 
 <!-- 2. DASHBOARD ALBUM -->
-<section id="album">
-  <div class="hero"><h1 style="font-size:30px" id="title2"></h1></div>
+<section id="album" class="dash">
+  <div class="cover" id="cover"></div>
+  <div class="in">
+  <h1 class="ttl" id="title2"></h1>
   <div class="stats">
     <div><b id="sMoment">0</b><span>Momen</span></div>
-    <div><b id="sPeople">0</b><span>Orang</span></div>
+    <div><b id="sLeft">-</b><span>Tersisa</span></div>
+    <div><b><span id="sPeople" style="color:inherit;font-size:inherit">0</span><i>/<span id="mx">5</span></i></b><span>Orang ›</span></div>
   </div>
-  <div class="row">
-    <button class="btn" id="cam" style="flex:3">📷 Kamera</button>
-    <button class="btn alt" id="gal" style="flex:1">🖼️</button>
-    <button class="btn alt" id="qrBtn" style="flex:1">QR</button>
+  <div class="acts">
+    <button id="cam"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+    <button id="qrBtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v3M14 21h3M21 21h0"/></svg></button>
+    <button id="gal"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="16" height="16" rx="2"/><path d="M3 17l5-5 4 4 3-3 4 4M19 2v6M16 5h6"/></svg></button>
+    <button id="dl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 16l5-5 5 5M12 9v7M9 14l3 3 3-3"/></svg></button>
   </div>
   <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
   <input type="file" id="fGal" accept="image/*" hidden>
+  <div class="up" id="up"><div><small>UPGRADE ACARA INI?</small><b>Tambah pax</b><p>Paket gratis dibatasi 5 tamu</p></div><i>→</i></div>
   <div class="grid" id="grid"></div>
+  </div>
 </section>
 
 <!-- 3. BINGKAI QR -->
@@ -85,15 +108,19 @@ canvas{width:100%;border-radius:16px;margin:16px 0}
 
 <script>
 // ====== PENGATURAN: isi dari Supabase (Project Settings > API) ======
-const SUPA_URL = "https://ofwoephdirefoclwmnjg.supabase.co/rest/v1/";
-const SUPA_KEY = "sb_publishable_nSbubnH5fWmPBUhsGnEvzw__LncTnXl";
+const SUPA_URL = "ISI_URL_SUPABASE";
+const SUPA_KEY = "ISI_ANON_PUBLIC_KEY";
 const EVENT_TITLE = "Hari Pernikahan Kita";
+const EVENT_END = "2026-11-27T23:59:00"; // batas waktu acara
+const MAX_GUESTS = 5;                    // batas tamu paket gratis
 // ====================================================================
 
 const DEMO = SUPA_URL.startsWith("ISI");
-const db = DEMO ? null : supabase.createClient(SUPA_URL, SUPA_KEY);
+const BASE = DEMO ? "" : new URL(SUPA_URL).origin; // buang path tambahan seperti /rest/v1
+const db = DEMO ? null : supabase.createClient(BASE, SUPA_KEY);
 const local = [];
-const ALBUM = new URLSearchParams(location.search).get("a") || "acara";
+const ALBUM = (new URLSearchParams(location.search).get("a") || "acara").replace(/[^a-zA-Z0-9_-]/g, "").slice(0,40) || "acara";
+let rows = [];
 const $ = id => document.getElementById(id);
 const FILTERS = {
   Asli: "none",
@@ -106,7 +133,7 @@ let me = localStorage.getItem("nama") || "", file = null, filt = "Asli";
 
 function show(id){ document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === id)); }
 $("title").textContent = $("title2").textContent = EVENT_TITLE;
-$("name").value = me;
+$("name").value = me; $("mx").textContent = MAX_GUESTS;
 
 // 1. Masuk
 $("enter").onclick = () => {
@@ -117,6 +144,7 @@ $("enter").onclick = () => {
 };
 
 // 2. Dashboard
+const photoUrl = p => DEMO ? p.url : db.storage.from("photos").getPublicUrl(p.path).data.publicUrl;
 async function load(){
   let data;
   if(DEMO){ data = local; }
@@ -125,11 +153,15 @@ async function load(){
     if(r.error) return alert("Gagal memuat: " + r.error.message);
     data = r.data;
   }
+  rows = data;
   $("sMoment").textContent = data.length;
   $("sPeople").textContent = new Set(data.map(p => p.name)).size;
+  const ms = new Date(EVENT_END) - Date.now();
+  $("sLeft").textContent = ms <= 0 ? "Selesai" : Math.floor(ms/864e5) + "d " + Math.floor(ms%864e5/36e5) + "h";
+  if(data[0]) $("cover").style.backgroundImage = `url(${photoUrl(data[data.length-1])})`;
   $("grid").innerHTML = "";
   data.forEach(p => {
-    const url = DEMO ? p.url : db.storage.from("photos").getPublicUrl(p.path).data.publicUrl;
+    const url = photoUrl(p);
     const d = document.createElement("div");
     d.innerHTML = `<img loading="lazy" src="${url}" style="filter:${FILTERS[p.filter]||"none"}"><small></small>`;
     d.querySelector("small").textContent = p.name;
@@ -152,6 +184,14 @@ $("gal").onclick = () => $("fGal").click();
   });
   $("modal").classList.add("on"); i.value = "";
 });
+$("up").onclick = () => alert("Upgrade belum tersedia.");
+$("dl").onclick = async () => {
+  for(const p of rows){
+    const b = await (await fetch(photoUrl(p))).blob();
+    const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "momen-" + (p.id||Date.now()) + ".jpg"; a.click();
+    await new Promise(r => setTimeout(r, 400));
+  }
+};
 $("cancel").onclick = () => $("modal").classList.remove("on");
 
 // Kecilkan foto sebelum unggah (hemat storage gratis)
@@ -169,6 +209,8 @@ function shrink(f, max = 1600){
   });
 }
 $("send").onclick = async () => {
+  const names = new Set(rows.map(p => p.name));
+  if(!names.has(me) && names.size >= MAX_GUESTS) return alert("Paket gratis dibatasi " + MAX_GUESTS + " tamu.");
   $("send").disabled = true; $("send").textContent = "Mengunggah...";
   try {
     const blob = await shrink(file);
