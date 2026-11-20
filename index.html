@@ -49,6 +49,29 @@ input[type=text]{width:100%;padding:16px;border-radius:16px;border:1px solid #3d
 .grid img{width:100%;height:100%;object-fit:cover}
 .grid div:after{content:"";position:absolute;inset:55% 0 0;background:linear-gradient(transparent,#000a)}
 .grid small{position:absolute;left:18px;bottom:14px;font-style:italic;font-size:20px;z-index:1}
+.adm{max-width:720px!important}
+.adm header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:20px}
+.adm h2{font-size:22px;line-height:1.25}
+.adm h3{font-family:system-ui;font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin:30px 0 10px;display:flex;justify-content:space-between;align-items:center}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cards div{border:1px solid #3d2f1e;border-radius:14px;padding:14px 16px}
+.cards span{display:block;color:var(--mu);font-size:13px}
+.cards b{display:block;font-size:26px;font-weight:600;margin-top:4px}
+.sm{padding:9px 14px;border-radius:10px;border:1px solid #3d2f1e;background:transparent;color:var(--tx);font-size:14px;cursor:pointer}
+.sm.pri{background:#d9b779;color:#1a130b;border:0;font-weight:600}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;color:var(--mu);font-size:14px}
+.adm table{width:100%;border-collapse:collapse;font-size:15px}
+.adm td,.adm th{padding:11px 4px;border-bottom:1px solid #2c2216;text-align:left}
+.adm th{color:var(--mu);font-weight:500;font-size:13px}
+.adm tr.rw{cursor:pointer}.adm tr.sel td{color:#d9b779}
+.agrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.agrid figure{margin:0}
+.agrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;display:block}
+.agrid figcaption{font-size:12px;color:var(--mu);margin-top:6px;display:flex;justify-content:space-between;align-items:center;gap:4px}
+.agrid figcaption span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agrid button{background:none;border:0;color:var(--tx);font-size:15px;padding:2px 4px;cursor:pointer}
+.adm select,.adm input[type=date]{background:var(--card);color:var(--tx);border:1px solid #3d2f1e;border-radius:10px;padding:8px;font-size:14px;max-width:55%}
+.empty{color:var(--mu);font-size:14px;padding:16px 0}
 .modal{position:fixed;inset:0;background:#1a130bf5;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;z-index:9}
 .modal.on{display:flex}
 .modal img{max-width:100%;max-height:55vh;border-radius:16px}
@@ -84,14 +107,36 @@ canvas{width:100%;border-radius:16px;margin:16px 0}
   <div class="acts">
     <button id="cam"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
     <button id="qrBtn" style="display:none"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v3M14 21h3M21 21h0"/></svg></button>
-    <button id="gal"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="16" height="16" rx="2"/><path d="M3 17l5-5 4 4 3-3 4 4M19 2v6M16 5h6"/></svg></button>
     <button id="dl"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 16l5-5 5 5M12 9v7M9 14l3 3 3-3"/></svg></button>
   </div>
-  <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
-  <input type="file" id="fGal" accept="image/*" hidden>
   <div class="note" id="note"></div>
   <div class="grid" id="grid"></div>
   </div>
+</section>
+
+<!-- ADMIN -->
+<section id="admin" class="adm">
+  <header>
+    <div><h2 id="aTitle"></h2><p class="hint" id="aSub" style="margin:4px 0 0"></p></div>
+    <button class="sm" id="aOut">Keluar</button>
+  </header>
+  <div class="cards">
+    <div><span>Total foto</span><b id="aTotal">0</b></div>
+    <div><span>Tamu (perangkat)</span><b id="aDev">0</b></div>
+    <div><span>Status</span><b id="aStat">-</b></div>
+    <div><span>Sisa waktu</span><b id="aLeft">-</b></div>
+  </div>
+  <div class="bar">
+    <button class="sm pri" id="aDl">Unduh foto</button>
+    <button class="sm" id="aQr">Bingkai QR</button>
+  </div>
+  <div class="bar">
+    <span>Acara selesai</span><input type="date" id="aDate"><button class="sm" id="aSave">Simpan</button>
+  </div>
+  <h3>Tamu</h3>
+  <table><thead><tr><th>Nama</th><th>Foto</th><th>Terakhir</th></tr></thead><tbody id="aTbl"></tbody></table>
+  <h3><span>Foto</span><select id="aFilter"></select></h3>
+  <div class="agrid" id="aGrid"></div>
 </section>
 
 <!-- 3. BINGKAI QR -->
@@ -173,11 +218,12 @@ $("ownerLink").onclick = async e => {
   if(!p) return;
   const r = await db.rpc("owner_photos", {p_pass: p});
   if(r.error) return alert("Kode pemilik salah");
-  owner = p; sessionStorage.setItem("owner", p); show("album"); load();
+  owner = p; sessionStorage.setItem("owner", p); show("admin"); loadAdmin();
 };
 
 // 2. Dashboard
 async function load(){
+  await checkCam();
   if(!endAt){
     const e = await db.rpc("event_end");
     if(e.error) return alert("Gagal memuat: " + e.error.message);
@@ -208,9 +254,11 @@ async function load(){
   $("sLeft").textContent = ms <= 0 ? "Selesai" : Math.floor(ms/864e5) + "d " + Math.floor(ms%864e5/36e5) + "h";
   $("cover").style.backgroundImage = rows.length ? `url(${photoUrl(rows[rows.length-1])})` : "";
   const tgl = new Date(endAt).toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"});
-  $("note").textContent = owner ? "Mode pemilik: kamu melihat foto semua tamu."
+  const baseNote = owner ? "Mode pemilik: kamu melihat foto semua tamu."
     : ended() ? (rows.length ? "" : "Kamu belum mengunggah foto.")
     : "🔒 Foto bersifat privat. Hasil fotomu akan muncul di sini setelah acara selesai (" + tgl + ").";
+  $("note").textContent = (noCam && !owner ? "📱 " + NOCAM_MSG + " " : "") + baseNote;
+  $("cam").style.opacity = noCam ? .4 : 1;
   $("grid").innerHTML = "";
   rows.forEach(p => {
     const d = document.createElement("div");
@@ -231,13 +279,6 @@ $("dl").onclick = async () => {
   for(const p of rows){ await save(p); await new Promise(r => setTimeout(r, 400)); }
 };
 
-async function pick(i){
-  if(!i.files[0]) return;
-  if(ended()) { i.value = ""; return alert("Acara sudah selesai."); }
-  const c = await db.rpc("my_count", {p_device: DID});
-  if(!c.error && c.data >= MAX_PHOTOS){ i.value = ""; return alert("Batas " + MAX_PHOTOS + " foto per perangkat sudah tercapai."); }
-  fromCam = false; const f = i.files[0]; i.value = ""; preview(f);
-}
 function preview(f){
   file = f; filt = "Asli";
   $("prev").src = URL.createObjectURL(file); $("prev").style.filter = "none";
@@ -251,6 +292,15 @@ function preview(f){
   });
   $("modal").classList.add("on");
 }
+let noCam = false;
+const NOCAM_MSG = "Perangkat ini tidak memiliki kamera. Silakan buka website ini lewat HP untuk memotret.";
+async function checkCam(){
+  try{
+    if(!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices){ noCam = true; return; }
+    const d = await navigator.mediaDevices.enumerateDevices();
+    noCam = !d.some(x => x.kind === "videoinput");
+  }catch(e){ noCam = true; }
+}
 let stream = null, facing = "environment", fromCam = false;
 function stopCam(){ if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; } }
 async function startCam(){
@@ -259,13 +309,15 @@ async function startCam(){
     stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:facing, width:{ideal:1920}}, audio:false});
     $("vid").srcObject = stream;
     $("vid").style.transform = facing === "user" ? "scaleX(-1)" : "none";
-  }catch(e){ $("camv").classList.remove("on"); $("fCam").click(); }
+  }catch(e){ $("camv").classList.remove("on"); if(e && e.name === "NotFoundError") return alert("📱 " + NOCAM_MSG); alert("Kamera tidak bisa dibuka. Izinkan akses kamera di browser, lalu coba lagi. Jika dibuka dari Instagram/WhatsApp, buka lewat Chrome atau Safari."); }
 }
 async function openCam(){
   if(ended()) return alert("Acara sudah selesai.");
+  await checkCam();
+  if(noCam) return alert("📱 " + NOCAM_MSG);
   const c = await db.rpc("my_count", {p_device: DID});
   if(!c.error && c.data >= MAX_PHOTOS) return alert("Batas " + MAX_PHOTOS + " foto per perangkat sudah tercapai.");
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return $("fCam").click();
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return alert("Browser ini tidak mendukung kamera. Buka lewat Chrome atau Safari.");
   fromCam = true; $("camv").classList.add("on"); startCam();
 }
 $("cam").onclick = openCam;
@@ -277,9 +329,6 @@ $("shut").onclick = () => {
   c.getContext("2d").drawImage(v, 0, 0);
   c.toBlob(b => { stopCam(); $("camv").classList.remove("on"); fromCam = true; preview(b); }, "image/jpeg", .9);
 };
-$("gal").onclick = () => $("fGal").click();
-$("fCam").onchange = e => pick(e.target);
-$("fGal").onchange = e => pick(e.target);
 $("cancel").onclick = () => { $("modal").classList.remove("on"); if(fromCam) openCam(); };
 
 // Kecilkan foto sebelum unggah (hemat storage gratis)
@@ -314,9 +363,66 @@ $("send").onclick = async () => {
   $("send").disabled = false; $("send").textContent = "Simpan foto";
 };
 
+// ===== ADMIN =====
+let qrBack = "album", sel = "", cur = [];
+const esc = t => String(t == null ? "" : t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fDate = t => new Date(t).toLocaleDateString("id-ID", {day:"numeric", month:"long", year:"numeric"});
+const fTime = t => new Date(t).toLocaleString("id-ID", {day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"});
+async function loadAdmin(){
+  const e = await db.rpc("event_end"); if(!e.error) endAt = new Date(e.data).getTime();
+  const r = await db.rpc("owner_photos", {p_pass: owner});
+  if(r.error){ owner = ""; sessionStorage.removeItem("owner"); show("home"); return alert("Sesi pemilik tidak valid"); }
+  rows = r.data;
+  const g = {};
+  rows.forEach(p => { const k = p.device_id || "-"; (g[k] = g[k] || {id:k, name:p.name, n:0, last:p.created_at}).n++; });
+  const gs = Object.values(g);
+  if(sel && !g[sel]) sel = "";
+  $("aTitle").textContent = EVENT_TITLE;
+  $("aSub").textContent = "Acara selesai " + fDate(endAt);
+  $("aTotal").textContent = rows.length; $("aDev").textContent = gs.length;
+  $("aStat").textContent = ended() ? "Selesai" : "Berlangsung";
+  const ms = endAt - Date.now();
+  $("aLeft").textContent = ms <= 0 ? "-" : Math.floor(ms/864e5) + " hari " + Math.floor(ms%864e5/36e5) + " jam";
+  $("aDate").value = new Date(endAt + 7*36e5).toISOString().slice(0,10);
+  $("aTbl").innerHTML = gs.length ? gs.map(x => `<tr class="rw${x.id===sel?" sel":""}" data-id="${esc(x.id)}"><td>${esc(x.name)}</td><td>${x.n}/${MAX_PHOTOS}</td><td>${fTime(x.last)}</td></tr>`).join("")
+    : '<tr><td colspan="3" class="empty">Belum ada tamu.</td></tr>';
+  $("aFilter").innerHTML = '<option value="">Semua tamu</option>' + gs.map(x => `<option value="${esc(x.id)}"${x.id===sel?" selected":""}>${esc(x.name)} (${x.n})</option>`).join("");
+  renderGrid();
+}
+function renderGrid(){
+  cur = sel ? rows.filter(p => (p.device_id || "-") === sel) : rows;
+  $("aGrid").innerHTML = cur.length ? cur.map((p,i) => `<figure><img loading="lazy" src="${photoUrl(p)}" style="filter:${FILTERS[p.filter]||"none"}"><figcaption><span>${esc(p.name)} · ${fTime(p.created_at)}</span><span><button data-a="dl" data-i="${i}" title="Unduh">⬇</button><button data-a="del" data-i="${i}" title="Hapus">✕</button></span></figcaption></figure>`).join("")
+    : '<p class="empty" style="grid-column:1/-1">Belum ada foto.</p>';
+  document.querySelectorAll("#aTbl tr.rw").forEach(t => t.classList.toggle("sel", t.dataset.id === sel));
+}
+$("aTbl").onclick = e => { const t = e.target.closest("tr.rw"); if(!t) return; sel = t.dataset.id === sel ? "" : t.dataset.id; $("aFilter").value = sel; renderGrid(); };
+$("aFilter").onchange = e => { sel = e.target.value; renderGrid(); };
+$("aGrid").onclick = async e => {
+  const b = e.target.closest("button"); if(!b) return;
+  const p = cur[+b.dataset.i];
+  if(b.dataset.a === "dl") return save(p);
+  if(!confirm("Hapus foto dari " + p.name + "? Tindakan ini tidak bisa dibatalkan.")) return;
+  const r = await db.rpc("owner_delete", {p_pass: owner, p_path: p.path});
+  if(r.error) return alert("Gagal: " + r.error.message);
+  loadAdmin();
+};
+$("aDl").onclick = async () => {
+  if(!cur.length) return alert("Belum ada foto.");
+  if(!confirm("Unduh " + cur.length + " foto?")) return;
+  for(const p of cur){ await save(p); await new Promise(r => setTimeout(r, 400)); }
+};
+$("aQr").onclick = () => { qrBack = "admin"; show("qr"); drawQR(); };
+$("aOut").onclick = () => { owner = ""; sessionStorage.removeItem("owner"); show("home"); };
+$("aSave").onclick = async () => {
+  if(!$("aDate").value) return;
+  const r = await db.rpc("owner_set_end", {p_pass: owner, p_end: $("aDate").value + "T23:59:00+07:00"});
+  if(r.error) return alert("Gagal: " + r.error.message);
+  toast("Tanggal acara disimpan ✓"); loadAdmin();
+};
+
 // 3. Bingkai QR
 $("qrBtn").onclick = () => { show("qr"); drawQR(); };
-$("back").onclick = () => show("album");
+$("back").onclick = () => show(qrBack);
 function drawQR(){
   const c = $("qrCanvas"), x = c.getContext("2d"), W = c.width, H = c.height;
   x.fillStyle = "#faf8f4"; x.fillRect(0, 0, W, H);
